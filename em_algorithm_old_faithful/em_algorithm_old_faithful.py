@@ -15,9 +15,40 @@ data_waiting = data["waiting"]
 data_eruptions = data["eruptions"]
 zeroes = np.zeros(len(data_waiting))
 
-# Visualisation
-plt.scatter(data_waiting, data_eruptions, c="cyan", s=6, edgecolors="black")
-plt.show()
+
+
+# log-likelihood function
+
+def log_lik_two_norm(data, mu, sigma, p):
+    values = np.zeros((len(data), n_components))
+
+    for i in range(n_components):
+        values[:, i] = p[i] * norm.pdf(data, mu[i], sigma[i])  # mixture of Gaussian distributions
+
+    return values.sum()
+
+# EM iterative algorithm function
+
+def em_algorithm(data, mu_0, sigma_0, p_0, n_components):
+    tau = np.zeros((len(data), n_components)) # zvazit, zda tam dat pocatecni odhad
+    mu_k = mu_0
+    sigma_k = sigma_0
+    p_k = p_0
+
+    #while(log_lik_two_norm(data_waiting, mu_k, sigma_k, p_k) < 1e-2):
+        #tau = tau
+
+    return mu_k, sigma_k, p_k, tau
+
+
+# E-step
+#def e_step_tau(data, mu_k, sigma_k, p_k):
+    
+
+# M-step
+#def m_step(data, values):
+   
+
 
 
 # Number of components
@@ -25,33 +56,29 @@ n_components = 2
 
 # Initialise parameters
 mu = np.random.choice(data_waiting, n_components)
-sigma = np.random.random(n_components)
+sigma = 1 + 2*np.random.random(n_components)
 p = np.ones(n_components) / n_components  # n coefficients of the same value
 
 print(f"Initial means: {mu}")
 print(f"Initial variances: {sigma}")
 print(f"Initial mixing coefficients: {p}")
 
-# E-step
-def e_step(data, mu_k, sigma_k, p_k):
-    values = np.zeros((len(data), n_components))
+like = log_lik_two_norm(data_waiting, mu, sigma, p)
 
-    for i in range(n_components):
-        values[:, i] = p_k[i] * norm.pdf(data, mu[i], sigma[i])  # mixture of Gaussian distributions
+# Visualisation
+plt.scatter(data_waiting, data_eruptions, c="cyan", s=8, edgecolors="black")
 
-    values = values / values.sum(axis=1, keepdims=True)
-    return values
+# PDF graph
+xmin, xmax = plt.xlim()
+ymin, ymax = plt.ylim()
+x_vals = np.linspace(xmin, xmax, 100)
+y_1 = norm.pdf(x_vals, mu[0], sigma[0])
+y_2 = norm.pdf(x_vals, mu[1], sigma[1])
 
-# M-step
-def m_step(data, values):
-    n_kp = values.sum(axis=0) # n_k+1
-    mu = (values.T @ data) / n_kp
-    sigma = np.sqrt((values.T @ (data - mu)**2) / n_kp)
-    p_kp = n_kp / len(data)
-    return mu, sigma, p_kp
+plt.plot(x_vals, ymax*y_1, linewidth=2, c="red")
+plt.plot(x_vals, ymax*y_2, linewidth=2, c="blue")
+plt.show()
 
-# Calculating log-likelihood
+s = em_algorithm(data_waiting, mu, sigma, p, n_components=2)
 
-
-# The whole algorithm
-
+print(f"{s}")
