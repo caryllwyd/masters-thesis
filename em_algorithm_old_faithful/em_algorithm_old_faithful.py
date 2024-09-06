@@ -35,7 +35,7 @@ def e_step(data, mu, sigma, p):
     pdf, w, expectation = np.zeros([n_comp, n_data]), np.zeros([n_comp, n_data]), np.zeros([n_comp, n_data])
     w_sum = np.zeros(n_data)
     for i in range(n_comp):
-        pdf[i, :] = norm.pdf(data, mu[i], sigma[i])
+        pdf[i, :] = norm.pdf(data, mu[i], np.sqrt(sigma[i]))
         w[i, :] = p[i] * pdf[i, :]
     w_sum = w.sum(axis=0)
 
@@ -59,9 +59,9 @@ def m_step(expectation, data, p):
     
     for i in range(n_comp):
         for j in range(n_data):
-            sigma_hat_num[i] += expectation[i, j] * (mu_hat[i] - data[j])**2
+            sigma_hat_num[i] += expectation[i, j] * ((mu_hat[i] - data[j])**2)
             sigma_hat_den[i] += expectation[i, j]
-        sigma_hat[i] = min(sigma_hat_num[i]/sigma_hat_den[i], 5)
+        sigma_hat[i] = sigma_hat_num[i]/sigma_hat_den[i]
 
     p_hat = expectation.sum(axis=1)/n_data
     return mu_hat, sigma_hat, p_hat  
@@ -132,10 +132,18 @@ plt.show()
 #m = m_step(e, data_waiting, p)
 
 psi1 = [mu_0, sigma_0, p_0]
-for iter in range(20):
+like_diff, no_iter = 1, 0
+while(like_diff > 1e-5):
+    no_iter += 1
     psi2 = m_step(e_step(data_waiting, psi1[0], psi1[1], psi1[2]), data_waiting, psi1[2])
-    psi1 = [psi2[0], psi2[1], psi2[2]]
-    print(f"psi2: {psi1}")
-#s = em_algorithm(data_waiting, mu, sigma, p)
 
+    l1 = log_lik_mix_norm(data_waiting, psi1[0], psi1[1], psi1[2])
+    l2 = log_lik_mix_norm(data_waiting, psi2[0], psi2[1], psi2[2])
+    like_diff = abs(l2 - l1)
+    print(f"mu: {psi2[0]}")
+    psi1 = [psi2[0], psi2[1], psi2[2]]
+
+    
+#s = em_algorithm(data_waiting, mu, sigma, p)
+print(f"no_iter: {no_iter}")
 #print(f"{s}")
