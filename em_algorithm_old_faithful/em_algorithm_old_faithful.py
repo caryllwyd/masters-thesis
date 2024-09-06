@@ -61,7 +61,7 @@ def m_step(expectation, data, p):
         for j in range(n_data):
             sigma_hat_num[i] += expectation[i, j] * (mu_hat[i] - data[j])**2
             sigma_hat_den[i] += expectation[i, j]
-        sigma_hat[i] = sigma_hat_num[i]/sigma_hat_den[i]
+        sigma_hat[i] = min(sigma_hat_num[i]/sigma_hat_den[i], 5)
 
     p_hat = expectation.sum(axis=1)/n_data
     return mu_hat, sigma_hat, p_hat  
@@ -134,7 +134,7 @@ plt.show()
 psi1 = [mu_0, sigma_0, p_0]
 for iter in range(20):
     psi2 = m_step(e_step(data_waiting, psi1[0], psi1[1], psi1[2]), data_waiting, psi1[2])
-    psi1 = [psi2[0], [2,2], psi2[2]]
+    psi1 = [psi2[0], psi2[1], psi2[2]]
     print(f"psi2: {psi1}")
 #s = em_algorithm(data_waiting, mu, sigma, p)
 
