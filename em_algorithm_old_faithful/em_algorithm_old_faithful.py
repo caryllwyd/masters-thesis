@@ -2,7 +2,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import norm
-from scipy.optimize import minimize
+
+
+import locale
+locale.setlocale(locale.LC_NUMERIC, 'de_DE')
+
 
 import os
 os.chdir('C:/Users/turla/Documents/GitHub/masters-thesis/em_algorithm_old_faithful')
@@ -29,15 +33,17 @@ def visualise(mu, sigma, p, n_iter, res, name):
     n_comp = len(p)
     mu_r, sigma_r = np.round(mu, 3), np.round(sigma, 3),
     p_r = np.round(p, 3)
-    text_it_legend = (
+    text_text = (
         f"Iterace č. {n_iter}"  + "\n"
         rf"$\mu$ = {mu_r}" + "\n"
         rf"$\sigma$ = {sigma_r}" + "\n"
         rf"$p$ = {p_r}")
+    plt.rcParams['axes.formatter.use_locale'] = True
+    plt.figure(dpi=300)
     plt.xlabel("doba čekání (min)", labelpad=10)
     plt.tight_layout()
     plt.hist(data_waiting, color='skyblue', edgecolor='black', alpha = 0.5)
-    plt.text(88, 57, text_it_legend, fontsize=8)
+    plt.text(87, 57, text_text, fontsize=8)
     # density graph
     xmin, xmax = plt.xlim()
     ymin, ymax = plt.ylim()
@@ -50,10 +56,8 @@ def visualise(mu, sigma, p, n_iter, res, name):
     legend_elements = [
         plt.Line2D([0], [0], color='r', lw=2, label='hustota směsi'),
         plt.Rectangle((0, 0), 1, 1, fc='skyblue', edgecolor='black', label='histogram dat')]
-    plt.legend(handles=legend_elements, fontsize=12, loc = "upper left")
-
+    plt.legend(handles=legend_elements, fontsize=10, loc = "upper left")
     plt.plot(x_vals, ymax / max(y) * y, linewidth=1, c="red")
-    
     plt.savefig(name)
     plt.close()
 
@@ -129,10 +133,10 @@ print(f"Initial means: {mu_0}")
 print(f"Initial variances: {sigma_0}")
 print(f"Initial mixing coefficients: {p_0}")
 
-
+res = 150 # "resolution" (graininess) of density functions
 psi1 = [mu_0, sigma_0, p_0]
 visualise(mu_0, sigma_0, p_0,
-          n_iter=0, res=100, name="pics_latest_run/image0.png")
+          n_iter=0, res=res, name="pics_latest_run/image0.png")
 like_diff, no_iter = 1, 0
 while(like_diff > 1e-6):
     no_iter += 1 # iteration count
@@ -144,8 +148,8 @@ while(like_diff > 1e-6):
     if (no_iter % 5 == 0):
         print(f"mu({no_iter}): {psi2[0]},", 
               f"like: {log_lik_mix_norm(data_waiting, psi2[0], psi2[1], psi2[2])}")
-        visualise(psi2[0], psi2[1], psi2[2], n_iter=no_iter, res = 100, 
-                  name = f"pics_latest_run/image{no_iter}.png")
+    visualise(psi2[0], psi2[1], psi2[2], n_iter=no_iter, res=res, 
+                name = f"pics_latest_run/image{no_iter}.png")
     psi1 = [psi2[0], psi2[1], psi2[2]]
     #visualise(psi2[0], psi2[1], psi2[2], 100, f"pics_latest_run/image{no_iter}.png")
 
