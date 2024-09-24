@@ -5,6 +5,11 @@ from scipy.stats import norm
 import os
 os.chdir('C:/Users/turla/Documents/GitHub/masters-thesis/em_algorithm_old_faithful')
 
+file_path = 'em_old_faithful.csv'  
+data = pd.read_csv(file_path)
+data_waiting = data["waiting"]
+data_eruptions = data["eruptions"]
+
 def e_step(data, mu, sigma, p):
     n_comp, n_data = len(p), len(data)
     zero_vec = np.zeros([n_comp, n_data])
@@ -56,11 +61,40 @@ def m_step(expectation, data, p):
     p_hat = expectation.sum(axis=1)/n_data
     return mu_hat, sigma_hat, p_hat  
 
+def multiple_runs_em(data, no_runs):
+    n_components = 2
+    mu_hat = np.zeros([no_runs, n_components])
+    sigma_hat = np.zeros([no_runs, n_components])
+    p_hat = np.zeros([no_runs, n_components])
+    like = np.zeros(no_runs)
+    for i in range(no_runs):
+        mu_0 = np.random.choice(data, n_components)
+        sd = np.sqrt(np.var(data)) # standard deviation of dataset
+        sigma_0 = np.full(shape=n_components, fill_value=sd)
+        p_0 = np.ones(n_components) / n_components  # n coefficients of the same value
+        psi1 = [mu_0, sigma_0, p_0]
+
+        like_diff, no_iter = 1, 0
+        while(like_diff > 1e-6):
+            no_iter += 1 # iteration count
+            psi2 = m_step(e_step(data, psi1[0], psi1[1], psi1[2]), 
+                        data, psi1[2])
+            l1 = log_lik_mix_norm(data, psi1[0], psi1[1], psi1[2])
+            l2 = log_lik_mix_norm(data, psi2[0], psi2[1], psi2[2])
+            like_diff = abs(l2 - l1)
+            psi1 = [psi2[0], psi2[1], psi2[2]]
+
+        mu_hat[i, :], sigma_hat[i, :], p_hat[i, :] = np.round(psi1, 3)
+        like[i] = np.round(l2, 5)
+    for j in range(no_runs):
+        print(f"mu_hat: {mu_hat[j, :]}, likelihood: {like[j]}")
+
+
 
 def plot_hist_of(data_waiting):
     plt.figure(dpi=300)
     plt.xlabel("doba čekání (min)", labelpad=10)
-    plt.ylabel("počet erupcí", labelpad=10)
+    plt.ylabel("Frekvence výskytu", labelpad=10)
     plt.tight_layout()
     bin_ticks = range(42, 102, 5)
     plt.hist(data_waiting, color='skyblue', edgecolor='black', alpha=0.5, bins=bin_ticks) 
@@ -111,7 +145,6 @@ def visualise(data, mu, sigma, p, n_iter, res, name):
     plt.plot(x_vals, density, linewidth=1, c="red")
    
     plt.savefig(name)
-    plt.close()
-    
+    plt.close()   
 
- 
+multiple_runs_em(data_waiting, 100)

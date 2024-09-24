@@ -16,7 +16,7 @@ data_eruptions = data["eruptions"]
 n_components = 2
 
 # Initial parameter values
-mu_0 = [60, 57]#np.random.choice(data_waiting, n_components)
+mu_0 = [70, 70]#np.random.choice(data_waiting, n_components)
 sd = np.sqrt(np.var(data_waiting)) # standard deviation of dataset
 sigma_0 = np.full(shape=n_components, fill_value=sd)
 p_0 = np.ones(n_components) / n_components  # n coefficients of the same value
@@ -46,9 +46,9 @@ while(like_diff > 1e-6):
 
 print(f"Number of iterations: {no_iter}")
 
-plot_hist_of(data_waiting)
-plt.savefig("histogram_old_faithful.png")
-plt.close()
+#plot_hist_of(data_waiting)
+#plt.savefig("histogram_old_faithful.png")
+#plt.close()
 
 
 
