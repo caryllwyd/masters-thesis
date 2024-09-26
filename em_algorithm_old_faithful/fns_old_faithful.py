@@ -134,7 +134,7 @@ def visualise(data, mu, sigma, p, n_iter, res, name):
         rf"$\sigma$ = {sigma_r}" + "\n"
         rf"$p$ = {p_r}")
     
-    plt.text(38, 45, text_text, fontsize=8)
+    #plt.text(38, 45, text_text, fontsize=8)
     
         
     legend_elements = [
@@ -147,4 +147,4 @@ def visualise(data, mu, sigma, p, n_iter, res, name):
     plt.savefig(name)
     plt.close()   
 
-multiple_runs_em(data_waiting, 100)
+#multiple_runs_em(data_waiting, 100)

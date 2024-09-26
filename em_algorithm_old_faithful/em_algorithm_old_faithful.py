@@ -13,10 +13,10 @@ data_waiting = data["waiting"]
 data_eruptions = data["eruptions"]
 
 # Number of components
-n_components = 2
+n_components = 15
 
 # Initial parameter values
-mu_0 = [70, 70]#np.random.choice(data_waiting, n_components)
+mu_0 = np.random.choice(data_waiting, n_components)
 sd = np.sqrt(np.var(data_waiting)) # standard deviation of dataset
 sigma_0 = np.full(shape=n_components, fill_value=sd)
 p_0 = np.ones(n_components) / n_components  # n coefficients of the same value
@@ -37,13 +37,15 @@ while(like_diff > 1e-6):
     l1 = log_lik_mix_norm(data_waiting, psi1[0], psi1[1], psi1[2])
     l2 = log_lik_mix_norm(data_waiting, psi2[0], psi2[1], psi2[2])
     like_diff = abs(l2 - l1)
-    if (no_iter % 5 == 0):
+    if (no_iter % 100 == 0):
         print(f"mu({no_iter}): {psi2[0]},", 
               f"like: {log_lik_mix_norm(data_waiting, psi2[0], psi2[1], psi2[2])}")
-    visualise(data_waiting, psi2[0], psi2[1], psi2[2], n_iter=no_iter, res=res, 
+        visualise(data_waiting, psi2[0], psi2[1], psi2[2], n_iter=no_iter, res=res, 
                 name = f"pics_latest_run/image{no_iter}.png")
     psi1 = [psi2[0], psi2[1], psi2[2]]
-
+    
+visualise(data_waiting, psi2[0], psi2[1], psi2[2], n_iter=no_iter, res=res, 
+                name = f"pics_latest_run/image{no_iter}.png")
 print(f"Number of iterations: {no_iter}")
 
 #plot_hist_of(data_waiting)
